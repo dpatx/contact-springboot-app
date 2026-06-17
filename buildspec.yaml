@@ -9,9 +9,13 @@ phases:
       - aws --version
       - REGISTRY_URL=214604512124.dkr.ecr.eu-west-2.amazonaws.com
       - REPOSITORY_URI=$REGISTRY_URL/contact-app-registry
-      - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin $REGISTRY_URL
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      # --- DEBUGGING ENTRIES APPLIED BELOW ---
+      - echo "Fetching token from AWS CLI..."
+      - ECR_TOKEN=$(aws ecr get-login-password --region eu-west-2)
+      - echo "AWS CLI succeeded. Passing token to Docker daemon..."
+      - echo "$ECR_TOKEN" | docker login --username AWS --password-stdin $REGISTRY_URL
   build:
     commands:
       - echo "Build started on $(date)"
